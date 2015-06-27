@@ -1,0 +1,13 @@
+.*.swp
+*.o
+*.so
+*.log
+.DS_Store
+.idea/
+.metadata
+.classpath
+.settings
+.gitignore
+!/.gitignore
+*.class
+
