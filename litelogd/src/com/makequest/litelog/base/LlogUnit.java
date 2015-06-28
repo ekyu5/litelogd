@@ -74,8 +74,7 @@ public class LlogUnit {
 			e.printStackTrace();
 			throw new StringParseException("Log decode fail");
 		}
-        
-        log = logLine.split("|", 3);
+        log = logLine.split("|", 4);
         if (log.length != 4){
         	throw new StringParseException("Can't parse log token.");
         }

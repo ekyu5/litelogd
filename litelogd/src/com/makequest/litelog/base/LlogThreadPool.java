@@ -14,8 +14,7 @@ public class LlogThreadPool {
 	
 	public static void startWorker(){
 		for(LlogOutputAdaptor loa : tList){
-			Thread t = new Thread(loa);
-			t.start();
+			new Thread(loa).start();
 		}
 	}
 	
@@ -24,11 +23,17 @@ public class LlogThreadPool {
 		if (inst < 0){
 			// fail
 		}
-		tList.get(inst).getQueueHandler().add(unit);
+		try {
+			tList.get(inst).getQueueHandler().put(unit);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static int getSequence(LlogUnit unit){
 		if (tList.size() <= 0)	return -1;
+		if (tList.size() == 1)	return 0;
 		
 		MessageDigest md = null;
 		byte[] hashOutput = null;
@@ -50,6 +55,8 @@ public class LlogThreadPool {
 		valueOut |= (((int)hashOutput[1]) << 16) & 0x00FF0000;
 		valueOut |= (((int)hashOutput[2]) << 8) & 0x0000FF00;
 		valueOut |= ((int)hashOutput[3]) & 0x000000FF;
+		
+		if (valueOut < 0) valueOut = valueOut * -1;
 
 		return valueOut%tList.size();
 	}

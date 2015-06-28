@@ -5,15 +5,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public abstract class LlogOutputAdaptor implements Runnable{
 	
-	private LinkedBlockingQueue<LlogUnit> mQueue = null;
+	private LinkedBlockingQueue<LlogUnit> mQueue = new LinkedBlockingQueue<LlogUnit>();
 	private boolean isRun = true;
 	private byte mLevelLog = HeadConstant.level.all;
 	private byte mLevelTrace = HeadConstant.level.all;
-
-	
-	public LlogOutputAdaptor(){
-		mQueue = new LinkedBlockingQueue<LlogUnit>();
-	}
 	
 	public LinkedBlockingQueue<LlogUnit> getQueueHandler(){
 		return mQueue;

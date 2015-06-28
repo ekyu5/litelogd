@@ -9,6 +9,7 @@ import java.nio.channels.Selector;
 import java.util.Iterator;
 
 import com.makequest.litelog.exception.MalformedFrameException;
+import com.makequest.litelog.exception.StringParseException;
 
 public class LlogListener {
 	private static boolean isRun = true;
@@ -51,10 +52,16 @@ public class LlogListener {
 		InetSocketAddress remote = null;
 		LlogUnit unit = null;
 		try {
+			mRecvBuff.clear();
 			remote = (InetSocketAddress) channel.receive(mRecvBuff);
 			try {
 				unit = new LlogUnit(mRecvBuff.array(), remote);
+				unit.parseData();
 			} catch (MalformedFrameException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			} catch (StringParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return;
