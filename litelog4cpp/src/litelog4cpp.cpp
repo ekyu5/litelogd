@@ -2,10 +2,12 @@
 #ifndef _litelog_c_
 #define _litelog_c_
 
+#include "litelog4cpp.h"
+
 LiteLog::LiteLog(){
 	mGroup = strdup((char*)"anon");
-	char hostname[LITELOG_MAX_LEN_HOST];
-	if (gethostname(hostname, LITELOG_MAX_LEN_HOST - 1) != 0){
+	char hostname[LITELOG_MAXLEN_HOST];
+	if (gethostname(hostname, LITELOG_MAXLEN_HOST - 1) != 0){
 		mHost = strdup((char*)"unknown");
 	}
 	else {
@@ -15,17 +17,24 @@ LiteLog::LiteLog(){
 	char logname[8];
 	sprintf(logname, "%d", getpid());
 	mName = strdup(logname);
+	mLevel = L_ALL;
+	mMethod = M_STDOUT;
+	mLogPath = NULL;
+	mLogFileSize = LITELOG_FILE_DEFAULT_SIZE;
+	mLogFileBackup = LITELOG_FILE_DEFAULT_BACKUP;
+	mLitelog = NULL;
+	mSockLen = 0;
 }
 
 LiteLog::~LiteLog(){
 	if (mGroup != NULL)	free(mGroup);
 	if (mHost != NULL) free(mHost);
 	if (mName != NULL) free(mName);
-	if (mLiteLog != NULL) free(mLiteLog);
+	if (mLitelog != NULL) free(mLitelog);
 }
 
 int LiteLog::setLogLevel(int level){
-	swtich (level){
+	switch (level){
 		case L_ALL:
 		case L_DBG:
 		case L_INF:
@@ -75,19 +84,19 @@ int LiteLog::setName(char* name){
 	if (strlen(name) >= LITELOG_MAXLEN_NAME) return -2;
 	if (mName != NULL) free(mName);
 	
-	mName = strdup(host);
+	mName = strdup(name);
 	return 0;
 }
 
 int LiteLog::setLiteLogd(struct sockaddr* dest, size_t sock_len){
 	if (dest == NULL)	return -1;
-	if (	sock_len != sizeof(sockaddr_in)
-		&&	sock_len != sizeof(sockaddr_in6)	){
+	if (	sock_len != sizeof(struct sockaddr_in)
+		&&	sock_len != sizeof(struct sockaddr_in6)	){
 		return -2;
 	}
-	mLiteLog = (struct sockaddr*) malloc(sock_len);
+	mLitelog = (struct sockaddr*) malloc(sock_len);
 	memcpy((void*)mLitelog, (void*)dest, sock_len);
-	setMethod(M_NET);
+	setLogMethod(M_NET);
 	return 0;
 }
 
@@ -101,7 +110,7 @@ int LiteLog::setFileLog(char* path, size_t max_file_size, size_t max_backup_coun
 	else {
 		return -2;
 	}
-	
+	return 0;
 }
 
 

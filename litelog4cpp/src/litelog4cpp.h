@@ -2,6 +2,14 @@
 #ifndef _litelog_h_
 #define _litelog_h_
 
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <netinet/in.h>
+
 
 #define log(_l_,_f_,...) setlog(_l_,(char*)__FILE__,__LINE__,(char*)_f_,##__VA_ARGS__)
 
@@ -24,19 +32,19 @@ void	setLog(int level, char* file, int line, char*fmt, ...);
 
 class LiteLog {
 	private:
-		int		mLevel = L_ALL;
-		int		mMethod = M_STDOUT;
-		char*	mGroup = NULL;
-		char*	mHost = NULL;
-		char*	mName = NULL;
+		int		mLevel;
+		int		mMethod;
+		char*	mGroup;
+		char*	mHost;
+		char*	mName;
 		
-		char*	mLogPath = NULL;
-		size_t	mLogFileSize = LITELOG_FILE_DEFAULT_SIZE;
-		size_t	mLogFileBackup = LITELOG_FILE_DEFAULT_BACKUP;
+		char*	mLogPath;
+		size_t	mLogFileSize;
+		size_t	mLogFileBackup;
 		
 
-		struct sockaddr	*mLitelog = NULL;
-		size_t	mSockLen = 0;	
+		struct sockaddr	*mLitelog;
+		size_t	mSockLen;	
 	
 	public:
 		LiteLog();
@@ -50,7 +58,7 @@ class LiteLog {
 		int	setName(char* name);
 		int setLiteLogd(struct sockaddr* dest, size_t sock_len);
 		int setFileLog(	char* path
-					,	size_t max_file_size = LITELOG_DEFAULT_FILE_SIZE
+					,	size_t max_file_size = LITELOG_FILE_DEFAULT_SIZE
 					,	size_t max_backup_count = LITELOG_FILE_DEFAULT_BACKUP
 				);
 		
