@@ -42,9 +42,12 @@ class LiteLog {
 		size_t	mLogFileSize;
 		size_t	mLogFileBackup;
 		
-
 		struct sockaddr	*mLitelog;
 		size_t	mSockLen;	
+
+		int logFile(char* log);
+		int logLogd(char* log);
+		int logStdout(char* log);
 	
 	public:
 		LiteLog();
@@ -61,6 +64,7 @@ class LiteLog {
 					,	size_t max_file_size = LITELOG_FILE_DEFAULT_SIZE
 					,	size_t max_backup_count = LITELOG_FILE_DEFAULT_BACKUP
 				);
+		void writeLog(int level, char* file, int line, char*fmt, ...);
 		
 };
 
