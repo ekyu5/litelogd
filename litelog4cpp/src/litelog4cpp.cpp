@@ -33,11 +33,15 @@ LiteLog::~LiteLog(){
 	if (mLitelog != NULL) free(mLitelog);
 }
 
-int LiteLog::setLogLevel(int level){
+int LiteLog::setLogLevel(char level){
 	switch (level){
 		case L_ALL:
-		case L_DBG:
-		case L_INF:
+		case L_DBUG:
+		case L_INFO:
+		case L_WARN:
+		case L_EMIN:
+		case L_EMAJ:
+		case L_CRIT:
 			break;
 		default:
 			return -1;
@@ -113,8 +117,137 @@ int LiteLog::setFileLog(char* path, size_t max_file_size, size_t max_backup_coun
 	return 0;
 }
 
+int LiteLog::logFile(char* log){
+	if (mLogPath == NULL) return -1;
+	int rVal = 0;
+	char destfile[LITELOG_MAXLEN_NAME * 2];
+	sprintf(destfile, "%s/%s.log", mLogPath, mName);
 
+	int fileSize = 0;
+	
+	/* Check file size */
+	struct stat file;
+	int r = stat(destfile, &file);
+	if (r < 0){
+		switch (errno){
+			case ENOENT:
+				break;
+			default:
+				printf("WARN: Can't access log file (%d:%s)\n"
+						,	errno
+						,	strerror(errno)
+						);
+				return -1;
+		}
+	}
+	else{
+		fileSize = (int32)file.st_size;
+	}
 
+	/* Move log files when over the size limit */
+	if (fileSize >= (int)lSize){
+		char fileOld[1024];
+		char fileNew[1024];
+
+		for (int i = lBackup - 1 ; i >= 0 ; i--){ 
+			if (i != 0){                                   
+				rVal = sprintf(fileOld, "%s/%s.bak.%u"
+								,   mLogPath
+								,   mName
+								,   i
+							  );      
+			}          
+			else{     
+				rVal = sprintf(fileOld, "%s/%s.log"
+								,   mLogPath
+								,   mName
+							  );                                   
+			}                                       
+
+			rVal = sprintf(fileNew, "%s/%s.bak.%u"
+							,   mLogPath
+							,   mName
+							,   i+1                             
+					  );                                     
+
+			rVal = rename(fileOld, fileNew);        
+		}                                            
+	}
+
+	FILE* fp = fopen(destfile, "a+");
+	if (!fp){
+		return -11;
+	}
+
+	rVal = fputs(log, fp);
+	if (rVal < 0){
+		fclose(fp);
+		return -12;
+	}
+
+	fclose(fp);
+	return 1;
+}
+
+int LiteLog::logLogd(char level, char* log){
+	char hd1 = 0x00;
+	char hd2 = 0x00;
+
+	hd1 |= LITELOG_BIT_VERSION;
+	hd2 &= 0x0F;
+
+	static unsigned short seq = 0;
+	seq++;
+
+	char sendbuff[LITELOG_MAXLEN_LOGLINE];
+	sendbuff[0] = hd1;
+	sendbuff[1] = hd2;
+	memcpy((void*)&sendbuff[2], (void*)&htons(seq), 2);
+
+	int len = strncpy(&sendbuff[4], log, LITELOG_MAXLEN_LOGLINE - 4);
+	sendbuff[len + 4] = 0x00;
+
+	ssize_t len = sendto(mSock, (void*)&sendbuff, len+3, 0, mLiteLog, mSockLen);
+
+	return (int)len;
+}
+
+int LiteLog::logStdout(char level, char* log){
+	char printBuff[LITELOG_MAXLEN_LOGLINE];
+	int remain = LITELOG_MAXLEN_LOGLINE;
+	
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	struct tm*	cTime = localtime(&tv.tv_sec);
+
+	int len = sprintf(	printBuff, "%04d-%02d-%02d %02d:%02d:%02d.%04u [%s]"
+					,   cTime->tm_year+1900
+					,   cTime->tm_mon+1
+					,   cTime->tm_mday
+					,   cTime->tm_hour
+					,   cTime->tm_min
+					,   cTime->tm_sec
+					,   (uint32)tv.tv_usec/100
+					,	getLogName(level)
+			);  
+	remain -= len;
+}
+
+int LiteLog::getLogName(char level)
+{
+	char l = level & L_CRIT;
+	
+	switch (l){
+		case 0x00:	return (char*)"ALL";
+		case 0x02:	return (char*)"DBUG";
+		case 0x03:	return (char*)"INFO";
+		case 0x04:	return (char*)"WARN";
+		case 0x05:	return (char*)"EMIN";
+		case 0x06:	return (char*)"EMAJ";
+		case 0x07:	return (char*)"CRIT";
+	}
+	return (char*)"UDEF";
+}
 
 #endif
 

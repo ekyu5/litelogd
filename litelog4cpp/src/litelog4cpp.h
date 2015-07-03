@@ -16,19 +16,27 @@
 #define LITELOG_MAXLEN_GROUP	64
 #define LITELOG_MAXLEN_HOST		64
 #define LITELOG_MAXLEN_NAME		64
+#define LITELOG_MAXLEN_LOGLINE	1024
 
 #define LITELOG_FILE_DEFAULT_SIZE	100*1024*1024
 #define LITELOG_FILE_DEFAULT_BACKUP	3
 
+#define LITELOG_BIT_VERSION		0x20
+
 #define L_ALL	0x00
-#define L_DBG	0x01
-#define L_INF	0x02
+#define L_DBUG	0x02
+#define L_INFO	0x03
+#define L_WARN	0x04
+#define L_EMIN	0x05
+#define L_EMAJ	0x06
+#define L_CRIT	0x07
+
+#define L_TRACE 0x08
+
 
 #define M_STDOUT 	1
 #define M_FILE		2
 #define M_NET		3
-
-void	setLog(int level, char* file, int line, char*fmt, ...);
 
 class LiteLog {
 	private:
@@ -41,7 +49,8 @@ class LiteLog {
 		char*	mLogPath;
 		size_t	mLogFileSize;
 		size_t	mLogFileBackup;
-		
+	
+		int		mSock;	
 		struct sockaddr	*mLitelog;
 		size_t	mSockLen;	
 
@@ -53,7 +62,7 @@ class LiteLog {
 		LiteLog();
 		~LiteLog();
 
-		int	setLogLevel(int level);
+		int	setLogLevel(char level);
 		int	setLogMethod(int method);
 		
 		int	setGroup(char* group);
@@ -64,8 +73,9 @@ class LiteLog {
 					,	size_t max_file_size = LITELOG_FILE_DEFAULT_SIZE
 					,	size_t max_backup_count = LITELOG_FILE_DEFAULT_BACKUP
 				);
-		void writeLog(int level, char* file, int line, char*fmt, ...);
-		
+		void writeLog(char level, char* file, int line, char*fmt, ...);
+
+		static char* getLogName(char level);
 };
 
 #endif
