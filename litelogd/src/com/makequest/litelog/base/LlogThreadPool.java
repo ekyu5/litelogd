@@ -21,7 +21,7 @@ public class LlogThreadPool {
 	public static void allocWorker(LlogUnit unit){
 		int inst = getSequence(unit);
 		if (inst < 0){
-			// fail
+			System.out.println("Fail to alloc worker");
 		}
 		try {
 			tList.get(inst).getQueueHandler().put(unit);

@@ -10,7 +10,8 @@ public class StdoutOutputLog extends LlogOutputAdaptor{
 	public void logNormal(InetAddress from, String group, String host,
 			String name, String log) {
 		// TODO Auto-generated method stub
-		System.out.println("LOG   : " + from.toString() + " " + group + " " + host +" " + name + " " + log);
+		// System.out.println("LOG   : " + from.toString() + " " + group + " " + host +" " + name + " " + log);
+		System.out.println("LOG   : " + log);
 	}
 
 	@Override

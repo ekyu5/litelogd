@@ -42,6 +42,9 @@ public abstract class LlogOutputAdaptor implements Runnable{
 							,	log.getName()
 							,	log.getLog());
 				}
+				else {
+					System.out.println("New log arrived but level mismatch.");
+				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

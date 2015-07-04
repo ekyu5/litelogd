@@ -56,7 +56,7 @@ public class LlogUnit {
 		
         seq = (((int)datagram[2]) << 8) & 0xFF00;
         seq |= ((int)datagram[3]) & 0xFF;
-	}	
+   	}	
 	
 	/**
 	 * Parse received log data.
@@ -65,7 +65,7 @@ public class LlogUnit {
 	 * @throws StringParseException
 	 */
 	public void parseData() throws StringParseException{
-        byte[] logBody = Arrays.copyOfRange(datagram, 4, datagram.length);
+        byte[] logBody = Arrays.copyOfRange(datagram, 2, datagram.length);
         String logLine = null;
         try {
 			logLine = new String(logBody, "UTF-8");
